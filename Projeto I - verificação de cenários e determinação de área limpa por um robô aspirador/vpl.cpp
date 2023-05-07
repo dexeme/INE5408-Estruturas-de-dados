@@ -170,3 +170,22 @@ int main() {
 
 // -----------------------------------------------------------------------------------------
 
+// TO-DO:
+
+// 1. Achar uma forma de prevenir que o programa identifique quando a matriz no XML é inválida (exemplo das imagens)
+// 2. Criar uma função semelhante a ExtraiDimensoes, mas que extraia a matriz do XML em forma de string (filtrar
+// apenas os 0s e 1s)
+// 3. Criar uma função semelhante a ExtraiDimensoes, mas que extraia a posição inicial (x,y) do robô
+// 4. Criar uma função semelhante a ExtraiDimensoes, mas que extraia o nome da matriz (exemplo: "cenario-01"), 
+// para que o programa possa printar o nome da matriz na saída e também para que o programa salve a maior região
+// conexa entre todos os cenários daquele cenario especifico (exemplo: "cenario-01 25")
+// Exemplo de saída do programa:
+//
+// cenario-01 25
+// cenario-02 107
+// cenario-03 28
+// cenario-04 0
+// cenario-05 22
+// cenario-06 174
+
+// -----------------------------------------------------------------------------------------
