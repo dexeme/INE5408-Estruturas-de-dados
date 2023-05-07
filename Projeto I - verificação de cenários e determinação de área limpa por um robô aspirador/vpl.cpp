@@ -2,6 +2,9 @@
 #include <fstream>
 #include <string>
 #include <stack>
+#include <queue>
+#include <vector>
+#include <sstream>
 
 // ------------------------------------ VALIDA O XML --------------------------------------------
 
@@ -76,6 +79,78 @@ std::pair<int, int> ExtraiDimensoes(const std::string& xmlContent) {
 
 // ---------------------------------------------------------------------------------------
 
+// ------------------ CRIA MATRIZ ZERADA DE MESMA DIMENSÃO ------------------------------------
+
+std::string matrizZerada(std::pair<int, int> dimensoes) {
+    int altura = dimensoes.first;
+    int largura = dimensoes.second;
+    std::string matriz = "";
+    for (int i = 0; i < altura; i++) {
+        for (int j = 0; j < largura; j++) {
+            matriz += "0";
+        }
+    }
+    return matriz;
+}
+
+// ---------------------------------------------------------------------------------------
+
+
+// ------------------------------------ SIMULA O ROBO ------------------------------------
+
+int simulaRoboAspirador(const std::string& matrizContent, const std::string& matrizOriginalZerada, int& maxRegiaoConexa, int& altura, int& largura) {
+
+    // inicializa matriz de visitados
+    std::vector<std::vector<bool>> visitados(altura, std::vector<bool>(largura, false));
+
+    // inicializa a fila com a posição inicial (0, 0)
+    std::queue<std::pair<int, int>> fila;
+    fila.push(std::make_pair(0, 0));
+    visitados[0][0] = true;
+
+    // inicializa variáveis de contagem
+    int regiaoConexaAtual = 0;
+    int maiorRegiaoConexa = 0;
+
+    while (!fila.empty()) {
+        // obtém a posição atual da fila
+        auto posAtual = fila.front();
+        fila.pop();
+        regiaoConexaAtual++;
+
+        // obtém as posições dos vizinhos
+        int x = posAtual.first;
+        int y = posAtual.second;
+        std::vector<std::pair<int, int>> vizinhos = { {x - 1, y}, {x + 1, y}, {x, y - 1}, {x, y + 1} };
+
+        // percorre os vizinhos
+        for (auto vizinho : vizinhos) {
+            int x_vizinho = vizinho.first;
+            int y_vizinho = vizinho.second;
+
+            // verifica se a posição do vizinho é válida
+            if (x_vizinho >= 0 && x_vizinho < altura && y_vizinho >= 0 && y_vizinho < largura) {
+                // verifica se o vizinho não foi visitado e é um espaço para ser limpo
+                if (!visitados[x_vizinho][y_vizinho] && matrizOriginalZerada[x_vizinho * largura + y_vizinho] == '1') {
+                    // marca o vizinho como visitado e adiciona à fila
+                    visitados[x_vizinho][y_vizinho] = true;
+                    fila.push(std::make_pair(x_vizinho, y_vizinho));
+                }
+            }
+        }
+    }
+    // atualiza a maior região conexa
+    if (regiaoConexaAtual > maiorRegiaoConexa) {
+        maiorRegiaoConexa = regiaoConexaAtual;
+        maxRegiaoConexa = regiaoConexaAtual;
+    }
+    // printa a maior região conexa
+    std::cout << maiorRegiaoConexa << std::endl;
+    return regiaoConexaAtual;
+}
+
+
+// ---------------------------------------------------------------------------------------
 
 // -------------------------------------- MAIN -------------------------------------------
 
@@ -86,6 +161,9 @@ int main() {
     std::pair<int, int> dimensoes = ExtraiDimensoes(xmlContent);
     int altura = dimensoes.first;
     int largura = dimensoes.second;
+    std::string matrizOriginalZerada = matrizZerada(dimensoes);
+    int maxRegiaoConexa = 0;
+    simulaRoboAspirador(xmlContent, matrizOriginalZerada, maxRegiaoConexa, altura, largura);
     return 0;
 
 }
