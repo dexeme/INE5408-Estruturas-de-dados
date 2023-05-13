@@ -174,10 +174,10 @@ int** getCaseMatrix(const std::string& xmlContent, std::pair<int, int> dimension
                 matrix[i][j] = intCell;
             }
         }
-        std::cout << "\n";
     }
     return matrix;
 }
+
 
 // Funcao auxiliar que retorna o número de cenários de um XML.
 int getNumOfCases(std::string xmlContent) {
@@ -211,42 +211,101 @@ std::size_t* getCasesPositions(std::string xmlContent, int numOfCases) {
 }
 
 
-// Imprime o resultado da rotina do robô.
-void printResult(std::string caseName, int numOfClearedCells);
+// Imprime a matriz resultado para cada iteração da rotina do robô.
+void debug(int** clearMatrix, int height, int width) {
+    for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                std::cout << clearMatrix[i][j];
+            }
+            std::cout << "\n";
+        }
+        std::cout << "\n";
+}
 
 
 // Retorna o número de células limpas pelo robô.
-int runBot(int** clearMatrix, int** caseMatrix, std::pair<int, int> matrixDimensions, std::pair<int, int> botPos);
+int runBot(int** caseMatrix, std::pair<int, int> matrixDimensions, std::pair<int, int> botPos) {
+
+    int **clearMatrix = getClearMatrix(matrixDimensions);
+    std::queue<std::pair<int, int>> cellsQueue;
+
+    int bot_x = botPos.first;
+    int bot_y = botPos.second;
+    int heigt = matrixDimensions.first;
+    int width = matrixDimensions.second;
+    int total = 0;
+
+    if (caseMatrix[bot_y][bot_x] != 1) {
+        return 0;
+    }
+
+    ++total;
+    cellsQueue.push(std::make_pair(bot_y, bot_x));
+
+    do {
+        clearMatrix[bot_y][bot_x] = 1;
+        
+        int n1 = bot_y - 1 < 0 ? 0      : caseMatrix[bot_y - 1][bot_x];
+        int n2 = bot_x + 1 >= width ? 0 : caseMatrix[bot_y][bot_x + 1];
+        int n3 = bot_y + 1 >= heigt ? 0 : caseMatrix[bot_y + 1][bot_x];
+        int n4 = bot_x - 1 < 0 ? 0      : caseMatrix[bot_y][bot_x - 1];
+
+        if (n1 && !clearMatrix[bot_y - 1][bot_x])  {
+            clearMatrix[bot_y - 1][bot_x] = 1;
+            ++total;
+            cellsQueue.push(std::make_pair(bot_y - 1, bot_x));
+        }
+        if (n2 && !clearMatrix[bot_y][bot_x + 1]) {
+            clearMatrix[bot_y][bot_x + 1] = 1;
+            ++total;
+            cellsQueue.push(std::make_pair(bot_y, bot_x + 1));
+        }
+        if (n3 && !clearMatrix[bot_y + 1][bot_x]) {
+            clearMatrix[bot_y + 1][bot_x] = 1;
+            ++total;
+            cellsQueue.push(std::make_pair(bot_y + 1, bot_x));
+        }
+        if (n4 && !clearMatrix[bot_y][bot_x - 1]) {
+            clearMatrix[bot_y][bot_x - 1] = 1;
+            ++total;
+            cellsQueue.push(std::make_pair(bot_y, bot_x - 1));
+        }
+
+        cellsQueue.pop();
+        bot_y = cellsQueue.front().first;
+        bot_x = cellsQueue.front().second;
+
+    } while(!cellsQueue.empty());
+
+    return total;
+}
 
 
 // Inicializa a rotina de limpeza do robô.
 void initBotRoutine(std::string xmlContent, std::size_t casePos) {
     
     std::pair<int, int> dimensions = getMatrixDimensions(xmlContent, casePos);
-    int **clearMatrix = getClearMatrix(dimensions);
     int **caseMatrix = getCaseMatrix(xmlContent, dimensions, casePos);
     std::pair<int, int> botPos = getBotPosition(xmlContent, casePos);
 
-    int numOfClearedCells = runBot(clearMatrix, caseMatrix, dimensions, botPos);
+    int numOfClearedCells = runBot(caseMatrix, dimensions, botPos);
 
     std::string caseName = getCaseName(xmlContent, casePos);
-    void printResult(std::string caseName, int clearedCells);
+    std::cout << caseName << " " << numOfClearedCells << "\n";
 }
 
-int main(int argc, char** argv) {
 
-    char* xmlfilename = argv[1];
+int main(int argc, char** argv) {
+    char xmlfilename[100];
+    std::cin >> xmlfilename;
     std::string xmlContent = validateXML(xmlfilename);
 
     int numOfCases = getNumOfCases(xmlContent);
-
     std::size_t* casePos = getCasesPositions(xmlContent, numOfCases);
-    initBotRoutine(xmlContent, casePos[0]);
 
-    // for (int i = 0; i < numOfCases; i++) {
-    //     initBotRoutine(xmlContent, casePos[i]);
-    // }
+    for (int i = 0; i < numOfCases; i++) {
+        initBotRoutine(xmlContent, casePos[i]);
+    }
 
     return 0;
-
 }
